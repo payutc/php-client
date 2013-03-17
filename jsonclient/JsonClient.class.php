@@ -102,16 +102,8 @@ class JsonClient
 		$ch = curl_init($url);
 		curl_setopt_array($ch, $settings);
 
-        
-
 		// Éxécution de la requête
 		$result_encoded = curl_exec($ch);
-
-        preg_match_all('|Set-Cookie: (.*);|U', $result_encoded, $matches);   
-        $cookies = implode('; ', $matches[1]);		
-        $this->cookies = $cookies; 
-
-        //print($result_encoded);
 		$result = json_decode($result_encoded);
 
 		// Si erreur d'appel de cron
