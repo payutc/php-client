@@ -106,7 +106,7 @@ class JsonClient
 		$result_encoded = curl_exec($ch);
 		$result = json_decode($result_encoded);
 
-		// Si erreur d'appel de cron
+		// Si erreur d'appel de cURL
 		if (curl_errno($ch) != 0) {
 			throw new JsonException("Unknown", 503, "Erreur d'appel de cURL");
 		}
