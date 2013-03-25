@@ -117,9 +117,9 @@ class JsonClient
 			$code = isset($err->code) ? $err->code : "42";
 			$message = isset($err->message) ? $err->message : "";
 			throw new JsonException($type, $code, $message, curl_getinfo($ch, CURLINFO_HTTP_CODE));
-		}
-		// Sinon, on renvoie le résultat
-		else {
+		} else if (curl_getinfo($ch, CURLINFO_HTTP_CODE) != 200) {
+			throw new JsonException("UnknownType", 37, "", curl_getinfo($ch, CURLINFO_HTTP_CODE));
+		} else { // Sinon, on renvoie le résultat
 			return $result;
 		}
 	}
