@@ -35,12 +35,12 @@ class JsonClient
 	
 
 
-	public function __construct($url, $service, $curl_settings = array(), $useragent = "Payutc Json PHP Client", $cookie = "")
+	public function __construct($url, $service, $curl_settings = array(), $useragent = "Payutc Json PHP Client", $cookies = array())
 	{
 		$this->url = $url . '/' . $service . '/';
 		$this->useragent = $useragent;
-        $this->cookie = $cookie;
-		$this->curl_settings = $curl_settings + 
+		$this->cookies = $cookies;
+		$this->curl_settings = $curl_settings +
 			array(
 				CURLOPT_USERAGENT => $this->useragent,
 				CURLOPT_RETURNTRANSFER => true,
@@ -52,9 +52,10 @@ class JsonClient
 
     public function readHeader($ch, $header)
     {
-        preg_match('/^Set-Cookie: (.*?);/m', $header, $myCookie);
-        if(array_key_exists(1, $myCookie))
-            $this->cookie = $myCookie[1];
+        preg_match('/^Set-Cookie: (.*?)=(.*?);/m', $header, $capturedArgs);
+        if (array_key_exists(1, $capturedArgs) and array_key_exists(2, $capturedArgs)) {
+            $this->cookies[$capturedArgs[1]] = $capturedArgs[1] . '=' . $capturedArgs[1];
+        }
         return strlen($header);
     }
 
@@ -83,8 +84,9 @@ class JsonClient
 		// Réglages de cURL
 		$settings = $this->curl_settings;
 		$settings[CURLOPT_CUSTOMREQUEST] = $method;
-        if($this->cookie)
-            $settings[CURLOPT_COOKIE] = $this->cookie;
+        if($this->cookies) {
+            $settings[CURLOPT_COOKIE] = implode(';', array_values($this->cookies));
+        }
 		
 		// Construction de l'URL et des postfields
 		if($method == "GET"){
