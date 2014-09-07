@@ -54,7 +54,7 @@ class JsonClient
     {
         preg_match('/^Set-Cookie: (.*?)=(.*?);/m', $header, $capturedArgs);
         if (array_key_exists(1, $capturedArgs) and array_key_exists(2, $capturedArgs)) {
-            $this->cookies[$capturedArgs[1]] = $capturedArgs[1] . '=' . $capturedArgs[1];
+            $this->cookies[$capturedArgs[1]] = $capturedArgs[1] . '=' . $capturedArgs[2];
         }
         return strlen($header);
     }
