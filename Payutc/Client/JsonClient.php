@@ -32,10 +32,11 @@ class JsonClient
 	protected $useragent;
 	protected $curl_settings;
     protected $result_encoded;
-	
+    protected $system_id;
+    protected $app_key;
 
 
-	public function __construct($url, $service, $curl_settings = array(), $useragent = "Payutc Json PHP Client", $cookies = array())
+	public function __construct($url, $service, $curl_settings = array(), $useragent = "Payutc Json PHP Client", $cookies = array(), $system_id = null, $app_key = null)
 	{
 		$this->url = $url . '/' . $service . '/';
 		$this->useragent = $useragent;
@@ -48,6 +49,8 @@ class JsonClient
                 CURLOPT_CAINFO => __DIR__ . "/../../TERENA_SSL_CA.pem",
                 CURLOPT_HEADERFUNCTION => array($this, 'readHeader'),
 			);
+        $this->system_id = $system_id;
+        $this->app_key = $app_key;
 	}
 
     public function readHeader($ch, $header)
@@ -69,17 +72,17 @@ class JsonClient
 	 * @param array $params un array key=>value des paramètres. default: array()
 	 * @param string $method le méthode à utiliser (GET ou POST). default: 'POST'
 	 */
-	public function apiCall($func, array $params = array(), $method = 'POST')
-	{
-		// Construction de la chaîne de paramètres
-		$paramstring = "";
-		if (!empty($params)) {
-			foreach ($params as $key => $param) {
-				$paramstring .= $key . "=" . $param . "&";
-			}
-			// On supprimer le dernier &
-			$paramstring = substr($paramstring, 0, -1);
-		}
+    public function apiCall($func, array $params = array(), $method = 'POST')
+    {
+        // Construction de la chaîne de paramètres
+        $paramstring = "";
+        if (!empty($this->system_id)) {
+            $paramstring .= "system_id=" . $this->system_id . "&";
+        }
+        if (!empty($this->app_key)) {
+            $paramstring .= "app_key=" . $this->app_key . "&";
+        }
+
 		
 		// Réglages de cURL
 		$settings = $this->curl_settings;
@@ -90,11 +93,23 @@ class JsonClient
 		
 		// Construction de l'URL et des postfields
 		if($method == "GET"){
+            if (!empty($params)) {
+                foreach ($params as $key => $param) {
+                    $paramstring .= $key . "=" . $param . "&";
+                }
+                // On supprimer le dernier &
+                $paramstring = substr($paramstring, 0, -1);
+            }
 			$url = $this->url . $func . "?" . $paramstring;
 		}
 		else {
-			$url = $this->url . $func;
-			$settings[CURLOPT_POSTFIELDS] = $params;
+            $data_string = json_encode($params);
+            $settings[CURLOPT_POSTFIELDS] = $data_string;
+            $settings[CURLOPT_HTTPHEADER] = array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data_string),
+            );
+            $url = $this->url . $func . "?" . $paramstring;
 		}
 		
 		// Initialisation de cURL
