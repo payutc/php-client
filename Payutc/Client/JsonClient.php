@@ -103,7 +103,7 @@ class JsonClient
 			$url = $this->url . $func . "?" . $paramstring;
 		}
 		else {
-            $data_string = json_encode($params);
+            $data_string = json_encode($params, JSON_FORCE_OBJECT);
             $settings[CURLOPT_POSTFIELDS] = $data_string;
             $settings[CURLOPT_HTTPHEADER] = array(
                 'Content-Type: application/json',
